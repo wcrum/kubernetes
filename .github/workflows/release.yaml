@@ -1,0 +1,69 @@
+name: Daily Kubernetes Build
+
+on:
+  schedule:
+    # Run at 2:00 UTC every day
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-missing-k8s-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get stable K8s releases
+        id: get-releases
+        run: |
+          # Fetch all stable K8s releases (vX.Y.Z format, no alpha, beta, rc)
+          STABLE_RELEASES=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases?per_page=50 | \
+            jq -r '.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name' | \
+            sort -V)
+          
+          echo "Found stable K8s releases:"
+          echo "$STABLE_RELEASES"
+          
+          # Convert the multi-line output to a JSON array for safe passing to next step
+          JSON_RELEASES=$(echo "$STABLE_RELEASES" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "stable_releases=$JSON_RELEASES" >> $GITHUB_OUTPUT
+
+      - name: Check missing versions and build
+        env:
+          REGISTRY: ghcr.io/loft-sh/
+        run: |
+          # Parse the JSON array of versions
+          VERSIONS=$(echo '${{ steps.get-releases.outputs.stable_releases }}' | jq -r '.[]')
+          
+          # Loop through each stable release
+          missing_versions=()
+          while IFS= read -r version; do
+            # Check if image exists (without architecture suffix)
+            if ! docker manifest inspect ${REGISTRY}kubernetes:${version} &>/dev/null; then
+              missing_versions+=("$version")
+              echo "Version $version not found in registry, will build"
+            else
+              echo "Version $version already exists in registry, skipping"
+            fi
+          done <<< "$VERSIONS"
+          
+          # Build missing versions
+          if [ ${#missing_versions[@]} -eq 0 ]; then
+            echo "No missing versions to build"
+          else
+            echo "Building missing versions: ${missing_versions[@]}"
+            for version in "${missing_versions[@]}"; do
+              echo "Building version $version"
+              make push K8S_VERSION=$version REGISTRY=${REGISTRY} IMAGE_NAME=kubernetes
+            done
+          fi
