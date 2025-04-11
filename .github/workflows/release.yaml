@@ -27,7 +27,7 @@ jobs:
         id: get-releases
         run: |
           # Fetch all stable K8s releases (vX.Y.Z format, no alpha, beta, rc)
-          STABLE_RELEASES=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases?per_page=100&page=2 | \
+          STABLE_RELEASES=$(curl -s https://api.github.com/repos/kubernetes/kubernetes/releases?per_page=50 | \
             jq -r '.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name' | \
             sort -V)
           
