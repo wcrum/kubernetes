@@ -262,7 +262,7 @@ For more details on what's new, see the [Kubernetes release notes](https://githu
 | Kubelet | [${KUBERNETES_VERSION}](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}) |
 | Kubectl | [${KUBERNETES_VERSION}](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}) |
 | CNI Binaries | [${CNI_BINARIES_VERSION}](https://github.com/containernetworking/plugins/releases/tag/${CNI_BINARIES_VERSION}) |
-| Containerd | [${CONTAINERD_VERSION}](https://github.com/containerd/containerd/releases/tag/v${CONTAINERD_VERSION}) |
+| Containerd | [v${CONTAINERD_VERSION}](https://github.com/containerd/containerd/releases/tag/v${CONTAINERD_VERSION}) |
 | Runc | [${RUNC_VERSION}](https://github.com/opencontainers/runc/releases/tag/${RUNC_VERSION}) |
 | Crictl | [${CRICTL_VERSION}](https://github.com/kubernetes-sigs/cri-tools/releases/tag/${CRICTL_VERSION}) |
 EOF
