@@ -73,7 +73,7 @@ jobs:
               # Create a new release with the archives as assets
               gh release create $VERSION \
                 --title "Kubernetes $VERSION" \
-                --notes-file "./release/kubernetes-$VERSION.txt" \
+                --notes-file "./kubernetes-$VERSION.txt" \
                 --repo ${{ github.repository }} \
                 "./kubernetes-$VERSION-amd64.tar.gz" \
                 "./kubernetes-$VERSION-arm64.tar.gz"
