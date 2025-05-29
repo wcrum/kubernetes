@@ -1,0 +1,85 @@
+name: Daily Kubernetes Binaries Build
+
+on:
+  schedule:
+    # Run at 2:00 UTC every day
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      page:
+        description: The page number to fetch
+        default: "1"
+        type: string
+      per_page:
+        description: The number of releases per page
+        default: "50"
+        type: string
+
+jobs:
+  build-missing-k8s-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get stable K8s releases
+        id: get-releases
+        run: |
+          PAGE=${{ inputs.page }}
+          if [ -z "$PAGE" ]; then
+            PAGE=1
+          fi
+
+          PER_PAGE=${{ inputs.per_page }}
+          if [ -z "$PER_PAGE" ]; then
+            PER_PAGE=50
+          fi
+
+          # Fetch all stable K8s releases (vX.Y.Z format, no alpha, beta, rc)
+          STABLE_RELEASES=$(curl -s "https://api.github.com/repos/kubernetes/kubernetes/releases?page=${PAGE}&per_page=${PER_PAGE}" | \
+            jq -r '.[] | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) | .tag_name' | \
+            sort -V)
+          
+          echo "Found stable K8s releases:"
+          echo "$STABLE_RELEASES"
+          
+          # Convert the multi-line output to a JSON array for safe passing to next step
+          JSON_RELEASES=$(echo "$STABLE_RELEASES" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "stable_releases=$JSON_RELEASES" >> $GITHUB_OUTPUT
+
+      - name: Check missing versions and download
+        run: |
+          # loop through the stable releases and check if we have a release for it in the current github repository, if not
+          # invoke hack/download.sh --kubernetes-version $version -target-arch $arch (where arch is either amd64 or arm64) and 
+          # then create a new release with the two archives under hack/kubernetes-$version-$arch.tar.gz as assets.
+          # Parse the stable releases from previous step
+          STABLE_RELEASES='${{ steps.get-releases.outputs.stable_releases }}'
+          
+          # Setup GitHub CLI
+          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+          
+          cd hack
+          for VERSION in $(echo $STABLE_RELEASES | jq -r '.[]'); do
+            # Check if release already exists in this repo
+            if ! gh release view $VERSION --repo ${{ github.repository }} &>/dev/null; then
+              echo "Building release for Kubernetes $VERSION..."
+              
+              # Download for amd64
+              ./download.sh --kubernetes-version $VERSION --target-arch amd64
+              
+              # Download for arm64
+              ./download.sh --kubernetes-version $VERSION --target-arch arm64
+              
+              # Create a new release with the archives as assets
+              gh release create $VERSION \
+                --title "Kubernetes $VERSION" \
+                --notes-file "./release/kubernetes-$VERSION.txt" \
+                --repo ${{ github.repository }} \
+                "./kubernetes-$VERSION-amd64.tar.gz" \
+                "./kubernetes-$VERSION-arm64.tar.gz"
+              
+              echo "Released Kubernetes $VERSION"
+            else
+              echo "Release for Kubernetes $VERSION already exists, skipping"
+            fi
+          done

@@ -1,0 +1,6 @@
+/release
+/versions
+
+/hack/release
+/hack/versions
+/hack/*.tar.gz
