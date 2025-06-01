@@ -1,4 +1,4 @@
-name: Daily Kubernetes Images Build
+name: Daily Kubernetes Full Images Build
 
 on:
   schedule:
