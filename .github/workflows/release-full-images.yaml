@@ -5,14 +5,15 @@ on:
     # Run at 2:00 UTC every day
     - cron: '0 2 * * *'
   workflow_dispatch: 
-    page:
-      description: The page number to fetch
-      default: "1"
-      type: string
-    per_page:
-      description: The number of releases per page
-      default: "50"
-      type: string
+    inputs:
+      page:
+        description: The page number to fetch
+        default: "1"
+        type: string
+      per_page:
+        description: The number of releases per page
+        default: "50"
+        type: string
 
 jobs:
   build-missing-k8s-versions:
