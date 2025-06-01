@@ -31,6 +31,8 @@ RUN mkdir -p /kubernetes && \
 COPY --from=apiserver /usr/local/bin/kube-apiserver /kubernetes/
 COPY --from=controller /usr/local/bin/kube-controller-manager /kubernetes/
 COPY --from=scheduler /usr/local/bin/kube-scheduler /kubernetes/
+COPY ./kubernetes-*-amd64.tar.gz /kubernetes/
+COPY ./kubernetes-*-arm64.tar.gz /kubernetes/
 
 # Set executable permissions and ownership
 RUN chmod +x /kubernetes/kube-* && \
