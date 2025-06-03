@@ -14,29 +14,18 @@ LABEL version="${K8S_VERSION}"
 
 # Install necessary packages
 RUN apk --no-cache add \
-    ca-certificates \
-    bash \
-    curl \
-    tzdata
-
-# Create a non-root user
-RUN addgroup -g 1000 kubernetes && \
-    adduser -D -u 1000 -G kubernetes kubernetes
-
-# Create directory for Kubernetes components
-RUN mkdir -p /kubernetes && \
-    chown -R kubernetes:kubernetes /kubernetes
+      ca-certificates bash curl tzdata \
+    && addgroup -g 1000 kubernetes \
+    && adduser -D -u 1000 -G kubernetes kubernetes \
+    && mkdir -p /kubernetes \
+    && chown -R kubernetes:kubernetes /kubernetes
 
 # Copy binaries from each component
-COPY --from=apiserver /usr/local/bin/kube-apiserver /kubernetes/
-COPY --from=controller /usr/local/bin/kube-controller-manager /kubernetes/
-COPY --from=scheduler /usr/local/bin/kube-scheduler /kubernetes/
-COPY ./kubernetes-*-amd64.tar.gz /kubernetes/
-COPY ./kubernetes-*-arm64.tar.gz /kubernetes/
-
-# Set executable permissions and ownership
-RUN chmod +x /kubernetes/kube-* && \
-    chown -R kubernetes:kubernetes /kubernetes
+COPY --from=apiserver --chown=kubernetes:kubernetes --chmod=0755 /usr/local/bin/kube-apiserver /kubernetes/
+COPY --from=controller --chown=kubernetes:kubernetes --chmod=0755 /usr/local/bin/kube-controller-manager /kubernetes/
+COPY --from=scheduler --chown=kubernetes:kubernetes --chmod=0755 /usr/local/bin/kube-scheduler /kubernetes/
+COPY --chown=kubernetes:kubernetes ./kubernetes-*-amd64.tar.gz /kubernetes/
+COPY --chown=kubernetes:kubernetes ./kubernetes-*-arm64.tar.gz /kubernetes/
 
 # Set up the container
 WORKDIR /

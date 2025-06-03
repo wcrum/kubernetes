@@ -14,6 +14,10 @@ on:
         description: The number of releases per page
         default: "50"
         type: string
+      force:
+        description: Force the build even if the release already exists
+        default: "false"
+        type: string
 
 jobs:
   build-missing-k8s-versions:
@@ -63,16 +67,26 @@ jobs:
         run: |
           # Parse the JSON array of versions
           VERSIONS=$(echo '${{ steps.get-releases.outputs.stable_releases }}' | jq -r '.[]')
+
+          FORCE=${{ inputs.force }}
+          if [ -z "$FORCE" ]; then
+            FORCE=false
+          fi
           
           # Loop through each stable release
           missing_versions=()
           while IFS= read -r version; do
-            # Check if image exists (without architecture suffix)
-            if ! docker manifest inspect ${REGISTRY}kubernetes:${version}-full &>/dev/null; then
+            if [ "$FORCE" = "true" ]; then
               missing_versions+=("$version")
-              echo "Version $version not found in registry, will build"
+              echo "Version $version not found in registry, will build (forced)"
             else
-              echo "Version $version already exists in registry, skipping"
+              # Check if image exists (without architecture suffix)
+              if ! docker manifest inspect ${REGISTRY}kubernetes:${version}-full &>/dev/null; then
+                missing_versions+=("$version")
+                echo "Version $version not found in registry, will build"
+              else
+                echo "Version $version already exists in registry, skipping"
+              fi
             fi
           done <<< "$VERSIONS"
           
