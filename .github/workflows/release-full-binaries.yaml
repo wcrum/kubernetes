@@ -75,6 +75,11 @@ jobs:
                 "./kubernetes-$VERSION-amd64-full.tar.gz" \
                 "./kubernetes-$VERSION-arm64-full.tar.gz" \
                 --repo ${{ github.repository }}
+
+              # Edit the release notes to include the component versions
+              gh release edit "$VERSION" \
+                --notes-file "./kubernetes-$VERSION.txt" \
+                --repo ${{ github.repository }}
               
               echo "Attached Kubernetes $VERSION binaries"
             else

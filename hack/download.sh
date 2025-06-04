@@ -236,7 +236,6 @@ rm -rf ./release
 if [ "$CONTROL_PLANE" = true ]; then
     # Create the directory for the control plane binaries
     mkdir -p ./release
-    rm -f ./kubernetes-${KUBERNETES_VERSION}.txt
 
     # Download kube-apiserver
     echo "Downloading kube-apiserver ${KUBERNETES_VERSION}..."
