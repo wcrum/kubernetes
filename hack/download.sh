@@ -54,6 +54,10 @@ while [ $# -gt 0 ]; do
       KONNEKTIVITY_VERSION="$2"
       shift 2
       ;;
+    --control-plane)
+      CONTROL_PLANE=true
+      shift 1
+      ;;
     *)
       echo "Unknown argument: $1"
       echo "Usage: $0 --kubernetes-version <version> [--cni-binaries-version <version>] [--containerd-version <version>] [--runc-version <version>] [--crictl-version <version>]"
@@ -196,8 +200,38 @@ curl -s -L https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRIC
 tar -zxf crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz -C ./release
 rm -f crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz
 
+# Pack the release folder into a tar.gz file
+echo "Packing the release folder into kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz..."
+tar -zcf kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz ./release
+
+# Write the notes to a file
+cat <<EOF > ./kubernetes-${KUBERNETES_VERSION}.txt
+This release contains required node binaries for Kubernetes ${KUBERNETES_VERSION}.
+
+For more details on what's new, see the [Kubernetes release notes](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}).
+
+## Component Versions
+| Component | Version |
+|---|---|
+| Kubeadm | [${KUBERNETES_VERSION}](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}) |
+| Kubelet | [${KUBERNETES_VERSION}](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}) |
+| Kubectl | [${KUBERNETES_VERSION}](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}) |
+| CNI Binaries | [${CNI_BINARIES_VERSION}](https://github.com/containernetworking/plugins/releases/tag/${CNI_BINARIES_VERSION}) |
+| Containerd | [v${CONTAINERD_VERSION}](https://github.com/containerd/containerd/releases/tag/v${CONTAINERD_VERSION}) |
+| Runc | [${RUNC_VERSION}](https://github.com/opencontainers/runc/releases/tag/${RUNC_VERSION}) |
+| Crictl | [${CRICTL_VERSION}](https://github.com/kubernetes-sigs/cri-tools/releases/tag/${CRICTL_VERSION}) |
+EOF
+
+# delete the release folder
+rm -rf ./release
+
 # Download the control plane binaries if the control plane flag is true
 if [ "$CONTROL_PLANE" = true ]; then
+    # Create the directory for the control plane binaries
+    mkdir -p ./release
+    rm -f ./kubernetes-${KUBERNETES_VERSION}.txt
+
+    # Download kube-apiserver
     echo "Downloading kube-apiserver ${KUBERNETES_VERSION}..."
     curl -s -L -o kube-apiserver https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kube-apiserver
     chmod +x kube-apiserver
@@ -223,13 +257,14 @@ if [ "$CONTROL_PLANE" = true ]; then
     # Install etcd
     echo "Downloading etcd ${ETCD_VERSION}..."
     curl -s -L -o ./etcd-${ETCD_VERSION}-linux-${TARGETARCH}.tar.gz https://github.com/etcd-io/etcd/releases/download/${ETCD_VERSION}/etcd-${ETCD_VERSION}-linux-${TARGETARCH}.tar.gz
-    tar xzf ./etcd-${ETCD_VERSION}-linux-${TARGETARCH}.tar.gz -C ./etcd-download-test --strip-components=1 --no-same-owner
+    mkdir -p ./etcd
+    tar xzf ./etcd-${ETCD_VERSION}-linux-${TARGETARCH}.tar.gz -C ./etcd --strip-components=1 --no-same-owner
     rm -f ./etcd-${ETCD_VERSION}-linux-${TARGETARCH}.tar.gz
-    chmod +x ./etcd-download-test/etcd
-    chmod +x ./etcd-download-test/etcdctl
-    mv ./etcd-download-test/etcd ./release/etcd
-    mv ./etcd-download-test/etcdctl ./release/etcdctl
-    rm -R ./etcd-download-test
+    chmod +x ./etcd/etcd
+    chmod +x ./etcd/etcdctl
+    mv ./etcd/etcd ./release/etcd
+    mv ./etcd/etcdctl ./release/etcdctl
+    rm -R ./etcd
 
     # Install kine
     echo "Downloading kine ${KINE_VERSION}..."
@@ -243,29 +278,14 @@ if [ "$CONTROL_PLANE" = true ]; then
     KONNECTIVITY_DOCKER_CONTAINER=$(docker create --platform linux/${TARGETARCH} registry.k8s.io/kas-network-proxy/proxy-server:${KONNECTIVITY_VERSION})
     docker cp ${KONNECTIVITY_DOCKER_CONTAINER}:/proxy-server ./release/konnectivity-server
     docker rm ${KONNECTIVITY_DOCKER_CONTAINER}
+
+    # Move the agent binaries
+    mv ./kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz ./release/kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz
+
+    # Pack the kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}-control-plane.tar.gz
+    echo "Packing the control plane folder into kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}-full.tar.gz..."
+    tar -zcf kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}-full.tar.gz ./release
+
+    # delete the release folder
+    rm -rf ./release
 fi
-
-# Pack the release folder into a tar.gz file
-echo "Packing the release folder into kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz..."
-tar -zcf kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz ./release
-
-# Write the notes to a file
-cat <<EOF > ./kubernetes-${KUBERNETES_VERSION}.txt
-This release contains required node binaries for Kubernetes ${KUBERNETES_VERSION}.
-
-For more details on what's new, see the [Kubernetes release notes](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}).
-
-## Component Versions
-| Component | Version |
-|---|---|
-| Kubeadm | [${KUBERNETES_VERSION}](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}) |
-| Kubelet | [${KUBERNETES_VERSION}](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}) |
-| Kubectl | [${KUBERNETES_VERSION}](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}) |
-| CNI Binaries | [${CNI_BINARIES_VERSION}](https://github.com/containernetworking/plugins/releases/tag/${CNI_BINARIES_VERSION}) |
-| Containerd | [v${CONTAINERD_VERSION}](https://github.com/containerd/containerd/releases/tag/v${CONTAINERD_VERSION}) |
-| Runc | [${RUNC_VERSION}](https://github.com/opencontainers/runc/releases/tag/${RUNC_VERSION}) |
-| Crictl | [${CRICTL_VERSION}](https://github.com/kubernetes-sigs/cri-tools/releases/tag/${CRICTL_VERSION}) |
-EOF
-
-# delete the release folder
-rm -rf ./release
