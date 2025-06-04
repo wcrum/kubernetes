@@ -1,4 +1,4 @@
-name: Daily Kubernetes Full (Control Plane + Node) Images Build
+name: Kubernetes Image Full (Control Plane + Node)
 
 on:
   schedule:

@@ -1,4 +1,4 @@
-name: Daily Kubernetes Binaries Build
+name: Kubernetes Binaries (Node)
 
 on:
   schedule:

@@ -1,4 +1,4 @@
-name: Daily Kubernetes Full (Control Plane + Node) Binaries Build
+name: Kubernetes Binaries Full (Control Plane + Node)
 
 on:
   schedule:
