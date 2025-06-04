@@ -206,7 +206,7 @@ tar -zcf kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz ./release
 
 # Write the notes to a file
 cat <<EOF > ./kubernetes-${KUBERNETES_VERSION}.txt
-This release contains required node binaries for Kubernetes ${KUBERNETES_VERSION}.
+This release contains required binaries for Kubernetes ${KUBERNETES_VERSION}.
 
 For more details on what's new, see the [Kubernetes release notes](https://github.com/kubernetes/kubernetes/releases/tag/${KUBERNETES_VERSION}).
 
