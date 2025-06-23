@@ -61,7 +61,56 @@ jobs:
           JSON_RELEASES=$(echo "$STABLE_RELEASES" | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "stable_releases=$JSON_RELEASES" >> $GITHUB_OUTPUT
 
-      - name: Check missing versions and build
+      - name: Build full images
+        env:
+          REGISTRY: ghcr.io/loft-sh/
+        run: |
+          # Parse the JSON array of versions
+          VERSIONS=$(echo '${{ steps.get-releases.outputs.stable_releases }}' | jq -r '.[]')
+
+          FORCE=${{ inputs.force }}
+          if [ -z "$FORCE" ]; then
+            FORCE=false
+          fi
+          
+          # Loop through each stable release
+          missing_versions=()
+          while IFS= read -r version; do
+            if [ "$FORCE" = "true" ]; then
+              missing_versions+=("$version")
+              echo "Version $version not found in registry, will build (forced)"
+            else
+              # Check if image exists (without architecture suffix)
+              if ! docker manifest inspect ${REGISTRY}kubernetes:${version}-full &>/dev/null; then
+                missing_versions+=("$version")
+                echo "Version $version not found in registry, will build"
+              else
+                echo "Version $version already exists in registry, skipping"
+              fi
+            fi
+          done <<< "$VERSIONS"
+          
+          # Build missing versions
+          if [ ${#missing_versions[@]} -eq 0 ]; then
+            echo "No missing versions to build"
+          else
+            echo "Building missing versions: ${missing_versions[@]}"
+            for version in "${missing_versions[@]}"; do
+              echo "Downloading kubernetes agent binaries for version $version"
+              cd hack
+              ./download.sh --kubernetes-version $version --target-arch amd64
+              ./download.sh --kubernetes-version $version --target-arch arm64
+              echo "Building version $version"
+              cd ..
+              mv hack/kubernetes-${version}-amd64.tar.gz kubernetes-${version}-amd64.tar.gz
+              mv hack/kubernetes-${version}-arm64.tar.gz kubernetes-${version}-arm64.tar.gz
+              make push K8S_VERSION=$version REGISTRY=${REGISTRY} IMAGE_NAME=kubernetes IMAGE_TAG=$version-full
+              rm -rf kubernetes-${version}-amd64.tar.gz
+              rm -rf kubernetes-${version}-arm64.tar.gz
+            done
+          fi
+
+      - name: Build node images
         env:
           REGISTRY: ghcr.io/loft-sh/
         run: |
