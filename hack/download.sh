@@ -241,14 +241,17 @@ if [ "$CONTROL_PLANE" = true ]; then
     echo "Downloading kube-apiserver ${KUBERNETES_VERSION}..."
     curl -s -L -o kube-apiserver https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kube-apiserver
     chmod +x kube-apiserver
+    cp kube-apiserver ./kube-apiserver-${TARGETARCH}
     mv kube-apiserver ./release/kube-apiserver
     echo "Downloading kube-controller-manager ${KUBERNETES_VERSION}..."
     curl -s -L -o kube-controller-manager https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kube-controller-manager
     chmod +x kube-controller-manager
+    cp kube-controller-manager ./kube-controller-manager-${TARGETARCH}
     mv kube-controller-manager ./release/kube-controller-manager
     echo "Downloading kube-scheduler ${KUBERNETES_VERSION}..."
     curl -s -L -o kube-scheduler https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kube-scheduler
     chmod +x kube-scheduler
+    cp kube-scheduler ./kube-scheduler-${TARGETARCH}
     mv kube-scheduler ./release/kube-scheduler
 
     # Install helm

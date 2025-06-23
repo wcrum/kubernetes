@@ -1,4 +1,4 @@
-name: Kubernetes Binaries
+name: Kubernetes
 
 on:
   schedule:
@@ -114,7 +114,17 @@ jobs:
                 echo "Released Kubernetes $VERSION"
               fi
 
+              # Build the images
+              make push K8S_VERSION=$version REGISTRY=${REGISTRY} IMAGE_NAME=kubernetes IMAGE_TAG=$version-full
+              make push K8S_VERSION=$version REGISTRY=${REGISTRY} IMAGE_NAME=kubernetes
+
               # Remove the downloaded files
+              rm -f "./kube-apiserver-amd64"
+              rm -f "./kube-apiserver-arm64"
+              rm -f "./kube-controller-manager-amd64"
+              rm -f "./kube-controller-manager-arm64"
+              rm -f "./kube-scheduler-amd64"
+              rm -f "./kube-scheduler-arm64"
               rm -f "./kubernetes-$VERSION-amd64.tar.gz"
               rm -f "./kubernetes-$VERSION-arm64.tar.gz"
               rm -f "./kubernetes-$VERSION-amd64-full.tar.gz"
