@@ -4,7 +4,6 @@ ARG TARGETARCH
 
 LABEL maintainer="Loft Labs Inc <support@loft.sh>"
 LABEL description="Kubernetes control plane components (apiserver, controller-manager, scheduler)"
-LABEL version="${K8S_VERSION}"
 
 # Install necessary packages
 RUN apk --no-cache add \
