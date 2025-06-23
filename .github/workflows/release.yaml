@@ -114,9 +114,27 @@ jobs:
                 echo "Released Kubernetes $VERSION"
               fi
 
-              # Build the images
-              make push K8S_VERSION=$version REGISTRY=${REGISTRY} IMAGE_NAME=kubernetes IMAGE_TAG=$version-full
-              make push K8S_VERSION=$version REGISTRY=${REGISTRY} IMAGE_NAME=kubernetes
+              # Remove the full archives
+              rm -f "./kubernetes-$VERSION-amd64-full.tar.gz"
+              rm -f "./kubernetes-$VERSION-arm64-full.tar.gz"
+
+              # Build the full image with node binaries
+              docker buildx build \
+                --build-arg K8S_VERSION=$version \
+                --platform linux/amd64,linux/arm64 \
+                -t ghcr.io/loft-sh/kubernetes:$version-full \
+                --push .
+
+              # Remove the node archives
+              rm -f "./kubernetes-$VERSION-amd64.tar.gz"
+              rm -f "./kubernetes-$VERSION-arm64.tar.gz"
+
+              # Build the control plane image
+              docker buildx build \
+                --build-arg K8S_VERSION=$version \
+                --platform linux/amd64,linux/arm64 \
+                -t ghcr.io/loft-sh/kubernetes:$version \
+                --push .
 
               # Remove the downloaded files
               rm -f "./kube-apiserver-amd64"
@@ -125,10 +143,6 @@ jobs:
               rm -f "./kube-controller-manager-arm64"
               rm -f "./kube-scheduler-amd64"
               rm -f "./kube-scheduler-arm64"
-              rm -f "./kubernetes-$VERSION-amd64.tar.gz"
-              rm -f "./kubernetes-$VERSION-arm64.tar.gz"
-              rm -f "./kubernetes-$VERSION-amd64-full.tar.gz"
-              rm -f "./kubernetes-$VERSION-arm64-full.tar.gz"
             else
               echo "Release for Kubernetes $VERSION already exists, skipping"
             fi
