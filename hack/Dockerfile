@@ -1,6 +1,3 @@
-# Multi-stage build to extract Kubernetes control plane binaries
-ARG K8S_VERSION=v1.28.0
-
 # Final Alpine-based image
 FROM alpine:3.18
 ARG TARGETARCH

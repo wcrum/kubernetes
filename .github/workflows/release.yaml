@@ -120,7 +120,6 @@ jobs:
 
               # Build the full image with node binaries
               docker buildx build \
-                --build-arg K8S_VERSION=$version \
                 --platform linux/amd64,linux/arm64 \
                 -t ghcr.io/loft-sh/kubernetes:$version-full \
                 --push .
@@ -131,7 +130,6 @@ jobs:
 
               # Build the control plane image
               docker buildx build \
-                --build-arg K8S_VERSION=$version \
                 --platform linux/amd64,linux/arm64 \
                 -t ghcr.io/loft-sh/kubernetes:$version \
                 --push .
