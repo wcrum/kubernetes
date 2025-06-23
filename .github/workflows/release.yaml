@@ -121,7 +121,7 @@ jobs:
               # Build the full image with node binaries
               docker buildx build \
                 --platform linux/amd64,linux/arm64 \
-                -t ghcr.io/loft-sh/kubernetes:$version-full \
+                -t ghcr.io/loft-sh/kubernetes:$VERSION-full \
                 --push .
 
               # Remove the node archives
@@ -131,7 +131,7 @@ jobs:
               # Build the control plane image
               docker buildx build \
                 --platform linux/amd64,linux/arm64 \
-                -t ghcr.io/loft-sh/kubernetes:$version \
+                -t ghcr.io/loft-sh/kubernetes:$VERSION \
                 --push .
 
               # Remove the downloaded files
