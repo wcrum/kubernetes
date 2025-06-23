@@ -80,12 +80,6 @@ jobs:
               echo "Building release for Kubernetes $VERSION..."
               
               # Download for amd64
-              ./download.sh --kubernetes-version $VERSION --target-arch amd64
-              
-              # Download for arm64
-              ./download.sh --kubernetes-version $VERSION --target-arch arm64
-              
-              # Download for amd64
               ./download.sh --kubernetes-version $VERSION --target-arch amd64 --control-plane
               
               # Download for arm64
@@ -114,6 +108,12 @@ jobs:
                 
                 echo "Released Kubernetes $VERSION"
               fi
+
+              # Remove the downloaded files
+              rm -f "./kubernetes-$VERSION-amd64.tar.gz"
+              rm -f "./kubernetes-$VERSION-arm64.tar.gz"
+              rm -f "./kubernetes-$VERSION-amd64-full.tar.gz"
+              rm -f "./kubernetes-$VERSION-arm64-full.tar.gz"
             else
               echo "Release for Kubernetes $VERSION already exists, skipping"
             fi

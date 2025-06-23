@@ -285,8 +285,8 @@ if [ "$CONTROL_PLANE" = true ]; then
     docker cp ${KONNECTIVITY_DOCKER_CONTAINER}:/proxy-server ./release/konnectivity-server
     docker rm ${KONNECTIVITY_DOCKER_CONTAINER}
 
-    # Move the agent binaries
-    mv ./kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz ./release/kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz
+    # Copy the agent binaries
+    cp ./kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz ./release/kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz
 
     # Pack the kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}-control-plane.tar.gz
     echo "Packing the control plane folder into kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}-full.tar.gz..."
