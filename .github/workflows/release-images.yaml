@@ -1,4 +1,4 @@
-name: Kubernetes Image (Node)
+name: Kubernetes Images
 
 on:
   schedule:
