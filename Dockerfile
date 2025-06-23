@@ -18,9 +18,9 @@ RUN apk --no-cache add \
     && chown -R kubernetes:kubernetes /kubernetes
 
 # Copy binaries from each component
-COPY --chown=kubernetes:kubernetes ./kube-apiserver-{TARGETARCH} /kubernetes/kube-apiserver
-COPY --chown=kubernetes:kubernetes ./kube-controller-manager-{TARGETARCH} /kubernetes/kube-controller-manager
-COPY --chown=kubernetes:kubernetes ./kube-scheduler-{TARGETARCH} /kubernetes/kube-scheduler
+COPY --chown=kubernetes:kubernetes ./kube-apiserver-${TARGETARCH} /kubernetes/kube-apiserver
+COPY --chown=kubernetes:kubernetes ./kube-controller-manager-${TARGETARCH} /kubernetes/kube-controller-manager
+COPY --chown=kubernetes:kubernetes ./kube-scheduler-${TARGETARCH} /kubernetes/kube-scheduler
 COPY --chown=kubernetes:kubernetes ./kubernetes-*-amd64.tar.gz /kubernetes/
 COPY --chown=kubernetes:kubernetes ./kubernetes-*-arm64.tar.gz /kubernetes/
 
