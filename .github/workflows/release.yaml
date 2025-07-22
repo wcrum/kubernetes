@@ -18,6 +18,9 @@ on:
         description: Force the build even if the release already exists
         default: "false"
         type: string
+      kubernetes_minor_version:
+        description: The minimum minor version of Kubernetes to build
+        type: string
 
 jobs:
   build-missing-k8s-versions:
@@ -74,6 +77,11 @@ jobs:
           if [ -z "$FORCE" ]; then
             FORCE=false
           fi
+
+          KUBERNETES_MINOR_VERSION=${{ inputs.kubernetes_minor_version }}
+          if [ -z "$KUBERNETES_MINOR_VERSION" ]; then
+            KUBERNETES_MINOR_VERSION="28"
+          fi
           
           # Setup GitHub CLI
           gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
@@ -81,7 +89,7 @@ jobs:
           cd hack
           for VERSION in $(echo $STABLE_RELEASES | jq -r '.[]'); do
             # Check if release already exists in this repo or if version is below 1.28
-            if [[ $(echo $VERSION | sed 's/v//') =~ ^([0-9]+)\.([0-9]+) ]] && [[ ${BASH_REMATCH[1]} -gt 1 || (${BASH_REMATCH[1]} -eq 1 && ${BASH_REMATCH[2]} -ge 28) ]]; then
+            if [[ $(echo $VERSION | sed 's/v//') =~ ^([0-9]+)\.([0-9]+) ]] && [[ ${BASH_REMATCH[1]} -gt 1 || (${BASH_REMATCH[1]} -eq 1 && ${BASH_REMATCH[2]} -ge $KUBERNETES_MINOR_VERSION) ]]; then
               if gh release view $VERSION --repo ${{ github.repository }} &>/dev/null && [[ $FORCE == "false" ]]; then
                 echo "Release for Kubernetes $VERSION already exists, skipping"
                 continue
