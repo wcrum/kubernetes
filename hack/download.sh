@@ -8,6 +8,7 @@ HELM_VERSION=""
 ETCD_VERSION=""
 KINE_VERSION=""
 KONNECTIVITY_VERSION="v0.32.0"
+TAILSCALED_VERSION="v1.78.1-loft.11"
 CONTROL_PLANE=false
 TARGETARCH="amd64"
 
@@ -199,6 +200,10 @@ echo "Downloading crictl ${CRICTL_VERSION}..."
 curl -s -L https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz --output crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz
 tar -zxf crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz -C ./release
 rm -f crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz
+
+# Download vcluster-tunnel
+echo "Downloading vcluster-tunnel ${TAILSCALED_VERSION}..."
+curl -L -o vcluster-tunnel https://github.com/loft-sh/tailscale/releases/download/${TAILSCALED_VERSION}/tailscaled-linux-${TARGETARCH} && chmod +x ./vcluster-tunnel && mv ./vcluster-tunnel ./release/vcluster-tunnel
 
 # Pack the release folder into a tar.gz file
 echo "Packing the release folder into kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz..."
