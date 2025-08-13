@@ -203,7 +203,7 @@ rm -f crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz
 
 # Download vcluster-tunnel
 echo "Downloading vcluster-tunnel ${TAILSCALED_VERSION}..."
-curl -L -o vcluster-tunnel https://github.com/loft-sh/tailscale/releases/download/${TAILSCALED_VERSION}/tailscaled-linux-${TARGETARCH} && chmod +x ./vcluster-tunnel && mv ./vcluster-tunnel ./release/vcluster-tunnel
+curl -s -L -o vcluster-tunnel https://github.com/loft-sh/tailscale/releases/download/${TAILSCALED_VERSION}/tailscaled-linux-${TARGETARCH} && chmod +x ./vcluster-tunnel && mv ./vcluster-tunnel ./release/vcluster-tunnel
 
 # Pack the release folder into a tar.gz file
 echo "Packing the release folder into kubernetes-${KUBERNETES_VERSION}-${TARGETARCH}.tar.gz..."
