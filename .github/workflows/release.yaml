@@ -159,6 +159,16 @@ jobs:
               rm -f "./kube-controller-manager-arm64"
               rm -f "./kube-scheduler-amd64"
               rm -f "./kube-scheduler-arm64"
+              rm -f "./helm-amd64"
+              rm -f "./helm-arm64"
+              rm -f "./etcd-amd64"
+              rm -f "./etcd-arm64"
+              rm -f "./etcdctl-amd64"
+              rm -f "./etcdctl-arm64"
+              rm -f "./kine-amd64"
+              rm -f "./kine-arm64"
+              rm -f "./konnectivity-server-amd64"
+              rm -f "./konnectivity-server-arm64"
             else
               echo "Release for Kubernetes $VERSION already exists, skipping"
             fi

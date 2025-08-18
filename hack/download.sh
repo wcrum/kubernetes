@@ -264,6 +264,7 @@ if [ "$CONTROL_PLANE" = true ]; then
     curl -s -L -o helm3.tar.gz https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz
     tar -zxf helm3.tar.gz linux-${TARGETARCH}/helm
     chmod +x linux-${TARGETARCH}/helm
+    cp linux-${TARGETARCH}/helm ./helm-${TARGETARCH}
     mv linux-${TARGETARCH}/helm ./release/helm
     rm helm3.tar.gz
     rm -R linux-${TARGETARCH}
@@ -276,7 +277,9 @@ if [ "$CONTROL_PLANE" = true ]; then
     rm -f ./etcd-${ETCD_VERSION}-linux-${TARGETARCH}.tar.gz
     chmod +x ./etcd/etcd
     chmod +x ./etcd/etcdctl
+    cp ./etcd/etcd ./etcd-${TARGETARCH}
     mv ./etcd/etcd ./release/etcd
+    cp ./etcd/etcdctl ./etcdctl-${TARGETARCH}
     mv ./etcd/etcdctl ./release/etcdctl
     rm -R ./etcd
 
@@ -284,6 +287,7 @@ if [ "$CONTROL_PLANE" = true ]; then
     echo "Downloading kine ${KINE_VERSION}..."
     curl -s -L -o kine https://github.com/k3s-io/kine/releases/download/${KINE_VERSION}/kine-${TARGETARCH}
     chmod +x kine
+    cp kine ./kine-${TARGETARCH}
     mv kine ./release/kine
 
     # Install konnektivity
@@ -291,6 +295,7 @@ if [ "$CONTROL_PLANE" = true ]; then
     docker pull --platform linux/${TARGETARCH} registry.k8s.io/kas-network-proxy/proxy-server:${KONNECTIVITY_VERSION}
     KONNECTIVITY_DOCKER_CONTAINER=$(docker create --platform linux/${TARGETARCH} registry.k8s.io/kas-network-proxy/proxy-server:${KONNECTIVITY_VERSION})
     docker cp ${KONNECTIVITY_DOCKER_CONTAINER}:/proxy-server ./release/konnectivity-server
+    cp ./release/konnectivity-server ./konnectivity-server-${TARGETARCH}
     docker rm ${KONNECTIVITY_DOCKER_CONTAINER}
 
     # Copy the agent binaries
