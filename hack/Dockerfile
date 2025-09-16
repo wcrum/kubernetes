@@ -14,9 +14,12 @@ RUN apk --no-cache add \
     && chown -R kubernetes:kubernetes /kubernetes
 
 # Copy binaries from each component
+# FIPS binaries (from spectro-fips-binaries)
 COPY --chown=kubernetes:kubernetes ./kube-apiserver-${TARGETARCH} /kubernetes/kube-apiserver
 COPY --chown=kubernetes:kubernetes ./kube-controller-manager-${TARGETARCH} /kubernetes/kube-controller-manager
 COPY --chown=kubernetes:kubernetes ./kube-scheduler-${TARGETARCH} /kubernetes/kube-scheduler
+# FIPS binaries (from spectro-fips) - containerd, runc, and crictl now available
+# Non-FIPS binaries (still using standard sources)
 COPY --chown=kubernetes:kubernetes ./helm-${TARGETARCH} /kubernetes/helm
 COPY --chown=kubernetes:kubernetes ./etcd-${TARGETARCH} /kubernetes/etcd
 COPY --chown=kubernetes:kubernetes ./etcdctl-${TARGETARCH} /kubernetes/etcdctl

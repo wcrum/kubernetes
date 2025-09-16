@@ -149,38 +149,35 @@ fi
 # Create the directory for the binaries
 mkdir -p ./release
 
-# Download kubeadm, kubelet, and kubectl
-echo "Downloading kubeadm ${KUBERNETES_VERSION}..."
-curl -s -L -o kubeadm https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kubeadm
+# Download kubeadm, kubelet, and kubectl from FIPS binaries
+echo "Downloading kubeadm ${KUBERNETES_VERSION} from FIPS binaries..."
+curl -s -L -o kubeadm https://storage.googleapis.com/spectro-fips-binaries/k8s/${KUBERNETES_VERSION}/kubeadm
 chmod +x kubeadm
 mv kubeadm ./release/kubeadm
-echo "Downloading kubelet ${KUBERNETES_VERSION}..."
-curl -s -L -o kubelet https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kubelet
+echo "Downloading kubelet ${KUBERNETES_VERSION} from FIPS binaries..."
+curl -s -L -o kubelet https://storage.googleapis.com/spectro-fips-binaries/k8s/${KUBERNETES_VERSION}/kubelet
 chmod +x kubelet
 mv kubelet ./release/kubelet
-echo "Downloading kubectl ${KUBERNETES_VERSION}..."
-curl -s -L -o kubectl https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kubectl
+echo "Downloading kubectl ${KUBERNETES_VERSION} from FIPS binaries..."
+curl -s -L -o kubectl https://storage.googleapis.com/spectro-fips-binaries/k8s/${KUBERNETES_VERSION}/kubectl
 chmod +x kubectl
 mv kubectl ./release/kubectl
 
-# Install CNI plugins
-echo "Downloading CNI plugins ${CNI_BINARIES_VERSION}..."
-curl -s -L -o cni.tgz https://github.com/containernetworking/plugins/releases/download/${CNI_BINARIES_VERSION}/cni-plugins-linux-${TARGETARCH}-${CNI_BINARIES_VERSION}.tgz
-mkdir cni
-tar -zxf cni.tgz -C cni
+# Install CNI plugins from FIPS binaries
+echo "Downloading CNI plugins ${CNI_BINARIES_VERSION} from FIPS binaries..."
 mkdir -p ./release/cni/bin
-mv cni/loopback ./release/cni/bin
-mv cni/portmap ./release/cni/bin
-mv cni/bandwidth ./release/cni/bin
-mv cni/bridge ./release/cni/bin
-mv cni/firewall ./release/cni/bin
-mv cni/host-local ./release/cni/bin
-rm cni.tgz
-rm -rf cni
+# Download individual CNI plugins from FIPS repository
+curl -s -L -o ./release/cni/bin/loopback https://storage.googleapis.com/spectro-fips-binaries/cni/${CNI_BINARIES_VERSION}/loopback
+curl -s -L -o ./release/cni/bin/portmap https://storage.googleapis.com/spectro-fips-binaries/cni/${CNI_BINARIES_VERSION}/portmap
+curl -s -L -o ./release/cni/bin/bandwidth https://storage.googleapis.com/spectro-fips-binaries/cni/${CNI_BINARIES_VERSION}/bandwidth
+curl -s -L -o ./release/cni/bin/bridge https://storage.googleapis.com/spectro-fips-binaries/cni/${CNI_BINARIES_VERSION}/bridge
+curl -s -L -o ./release/cni/bin/firewall https://storage.googleapis.com/spectro-fips-binaries/cni/${CNI_BINARIES_VERSION}/firewall
+curl -s -L -o ./release/cni/bin/host-local https://storage.googleapis.com/spectro-fips-binaries/cni/${CNI_BINARIES_VERSION}/host-local
+chmod +x ./release/cni/bin/*
 
-# Download containerd & runc
-echo "Downloading containerd ${CONTAINERD_VERSION}..."
-curl -s -L -o containerd.tgz https://github.com/containerd/containerd/releases/download/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${TARGETARCH}.tar.gz
+# Download containerd from FIPS binaries
+echo "Downloading containerd ${CONTAINERD_VERSION} from FIPS binaries..."
+curl -s -L -o containerd.tgz https://storage.googleapis.com/spectro-fips/containerd/v${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${TARGETARCH}.tar.gz
 tar -zxf containerd.tgz bin
 chmod +x bin/containerd-shim-runc-v2
 mv bin/containerd-shim-runc-v2 ./release/containerd-shim-runc-v2
@@ -190,18 +187,19 @@ chmod +x bin/ctr
 mv bin/ctr ./release/ctr
 rm containerd.tgz
 rm -rf bin
-echo "Downloading runc ${RUNC_VERSION}..."
-curl -s -L -o runc https://github.com/opencontainers/runc/releases/download/${RUNC_VERSION}/runc.${TARGETARCH}
+# Download runc from FIPS binaries
+echo "Downloading runc ${RUNC_VERSION} from FIPS binaries..."
+curl -s -L -o runc https://storage.googleapis.com/spectro-fips/runc/${RUNC_VERSION}/runc
 chmod +x runc
 mv runc ./release/runc
 
-# Download crictl
-echo "Downloading crictl ${CRICTL_VERSION}..."
-curl -s -L https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz --output crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz
+# Download crictl from FIPS binaries
+echo "Downloading crictl ${CRICTL_VERSION} from FIPS binaries..."
+curl -s -L https://storage.googleapis.com/spectro-fips/cri-tools/${CRICTL_VERSION}/cri-tools-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz --output crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz
 tar -zxf crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz -C ./release
 rm -f crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz
 
-# Download vcluster-tunnel
+# Download vcluster-tunnel (NOT YET AVAILABLE IN FIPS - using standard sources)
 echo "Downloading vcluster-tunnel ${TAILSCALED_VERSION}..."
 curl -s -L -o vcluster-tunnel https://github.com/loft-sh/tailscale/releases/download/${TAILSCALED_VERSION}/tailscaled-linux-${TARGETARCH} && chmod +x ./vcluster-tunnel && mv ./vcluster-tunnel ./release/vcluster-tunnel
 
@@ -242,24 +240,24 @@ if [ "$CONTROL_PLANE" = true ]; then
     # Create the directory for the control plane binaries
     mkdir -p ./release
 
-    # Download kube-apiserver
-    echo "Downloading kube-apiserver ${KUBERNETES_VERSION}..."
-    curl -s -L -o kube-apiserver https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kube-apiserver
+    # Download kube-apiserver from FIPS binaries
+    echo "Downloading kube-apiserver ${KUBERNETES_VERSION} from FIPS binaries..."
+    curl -s -L -o kube-apiserver https://storage.googleapis.com/spectro-fips-binaries/k8s/${KUBERNETES_VERSION}/kube-apiserver
     chmod +x kube-apiserver
     cp kube-apiserver ./kube-apiserver-${TARGETARCH}
     mv kube-apiserver ./release/kube-apiserver
-    echo "Downloading kube-controller-manager ${KUBERNETES_VERSION}..."
-    curl -s -L -o kube-controller-manager https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kube-controller-manager
+    echo "Downloading kube-controller-manager ${KUBERNETES_VERSION} from FIPS binaries..."
+    curl -s -L -o kube-controller-manager https://storage.googleapis.com/spectro-fips-binaries/k8s/${KUBERNETES_VERSION}/kube-controller-manager
     chmod +x kube-controller-manager
     cp kube-controller-manager ./kube-controller-manager-${TARGETARCH}
     mv kube-controller-manager ./release/kube-controller-manager
-    echo "Downloading kube-scheduler ${KUBERNETES_VERSION}..."
-    curl -s -L -o kube-scheduler https://dl.k8s.io/release/${KUBERNETES_VERSION}/bin/linux/${TARGETARCH}/kube-scheduler
+    echo "Downloading kube-scheduler ${KUBERNETES_VERSION} from FIPS binaries..."
+    curl -s -L -o kube-scheduler https://storage.googleapis.com/spectro-fips-binaries/k8s/${KUBERNETES_VERSION}/kube-scheduler
     chmod +x kube-scheduler
     cp kube-scheduler ./kube-scheduler-${TARGETARCH}
     mv kube-scheduler ./release/kube-scheduler
 
-    # Install helm
+    # Install helm (NOT YET AVAILABLE IN FIPS - using standard sources)
     echo "Downloading helm ${HELM_VERSION}..."
     curl -s -L -o helm3.tar.gz https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz
     tar -zxf helm3.tar.gz linux-${TARGETARCH}/helm
@@ -269,7 +267,7 @@ if [ "$CONTROL_PLANE" = true ]; then
     rm helm3.tar.gz
     rm -R linux-${TARGETARCH}
 
-    # Install etcd
+    # Install etcd (NOT YET AVAILABLE IN FIPS - using standard sources)
     echo "Downloading etcd ${ETCD_VERSION}..."
     curl -s -L -o ./etcd-${ETCD_VERSION}-linux-${TARGETARCH}.tar.gz https://github.com/etcd-io/etcd/releases/download/${ETCD_VERSION}/etcd-${ETCD_VERSION}-linux-${TARGETARCH}.tar.gz
     mkdir -p ./etcd
@@ -283,14 +281,14 @@ if [ "$CONTROL_PLANE" = true ]; then
     mv ./etcd/etcdctl ./release/etcdctl
     rm -R ./etcd
 
-    # Install kine
+    # Install kine (NOT YET AVAILABLE IN FIPS - using standard sources)
     echo "Downloading kine ${KINE_VERSION}..."
     curl -s -L -o kine https://github.com/k3s-io/kine/releases/download/${KINE_VERSION}/kine-${TARGETARCH}
     chmod +x kine
     cp kine ./kine-${TARGETARCH}
     mv kine ./release/kine
 
-    # Install konnektivity
+    # Install konnektivity (NOT YET AVAILABLE IN FIPS - using standard sources)
     echo "Downloading konnektivity ${KONNECTIVITY_VERSION}..."
     docker pull --platform linux/${TARGETARCH} registry.k8s.io/kas-network-proxy/proxy-server:${KONNECTIVITY_VERSION}
     KONNECTIVITY_DOCKER_CONTAINER=$(docker create --platform linux/${TARGETARCH} registry.k8s.io/kas-network-proxy/proxy-server:${KONNECTIVITY_VERSION})
