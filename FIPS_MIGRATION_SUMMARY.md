@@ -39,7 +39,7 @@ The following components have been successfully migrated to use FIPS binaries fr
 - **runc** - Available in FIPS repository (spectro-fips)
 - **crictl** - Available in FIPS repository (spectro-fips)
 
-## ❌ Still Using Standard (Non-FIPS) Sources
+## Still Using Standard (Non-FIPS) Sources
 
 The following components are **NOT YET AVAILABLE** in the FIPS repository and continue to use standard sources:
 
@@ -52,7 +52,7 @@ The following components are **NOT YET AVAILABLE** in the FIPS repository and co
 ### Networking Components
 - **vcluster-tunnel (tailscaled)** - Currently using GitHub releases
 
-## 🔧 Changes Made
+## Changes Made
 
 ### 1. Updated `hack/download.sh`
 - Modified Kubernetes core component downloads to use FIPS binaries
@@ -64,7 +64,7 @@ The following components are **NOT YET AVAILABLE** in the FIPS repository and co
 - Added comments to distinguish between FIPS and non-FIPS binaries
 - No functional changes required as the binary names remain the same
 
-## 🚀 Usage
+## Usage
 
 The updated scripts will automatically use FIPS binaries where available and fall back to standard sources for components not yet available in the FIPS repository.
 
